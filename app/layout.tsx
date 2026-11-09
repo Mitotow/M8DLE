@@ -66,6 +66,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 const RootLayout = async ({ children }: { children: React.ReactNode }) => {
     await connection()
+    
+    // Les scripts Vercel Analytics / Speed Insights n'existent que sur l'infra Vercel.
+    const isVercel = !!process.env.VERCEL
     const maintenance = isInMaintenanceMode() && !(await getCurrentAdmin())
 
     return (
@@ -74,8 +77,8 @@ const RootLayout = async ({ children }: { children: React.ReactNode }) => {
             suppressHydrationWarning
         >
             <body className={inter.className}>
-                <Analytics />
-                <SpeedInsights />
+                {isVercel && <Analytics />}
+                {isVercel && <SpeedInsights />}
                 <Provider>
                     <NextIntlClientProvider>
                         <Box
