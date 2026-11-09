@@ -11,9 +11,8 @@ import { Analytics } from '@vercel/analytics/next'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import { getTranslations } from 'next-intl/server'
 import { connection } from 'next/server'
-import { getSession } from '@/lib/auth/session'
+import { getCurrentAdmin } from '@/lib/auth/currentUser'
 import { isInMaintenanceMode } from '@/lib/maintenance'
-import { Role } from '@prisma/client'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -66,11 +65,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 const RootLayout = async ({ children }: { children: React.ReactNode }) => {
-    const session = await getSession()
     await connection()
-    const maintenance = isInMaintenanceMode() && !(session?.role === Role.ADMIN)
+    
     // Les scripts Vercel Analytics / Speed Insights n'existent que sur l'infra Vercel.
     const isVercel = !!process.env.VERCEL
+    const maintenance = isInMaintenanceMode() && !(await getCurrentAdmin())
 
     return (
         <html
